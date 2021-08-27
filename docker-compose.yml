@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  mysql:
+    image: mysql:8.0.26
+    container_name: "mysql"
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_DATABASE: git
+    volumes:
+      - ./out:/tmp
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+  flyway:
+    image: flyway/flyway:7.14.0-alpine
+    volumes:
+      - ./schema/sql:/flyway/sql
+      - ./schema/conf/flyway.conf:/flyway/conf/flyway.conf
+    depends_on:
+      - mysql
+    links:
+      - mysql
+  metabase:
+    image: metabase/metabase:v0.40.2
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+    links:
+      - mysql
